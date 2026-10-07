@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Idea Developer Council</title>
+<style>
+  :root { --bg:#0f1420; --card:#171e2e; --card2:#1d2639; --line:#2a3550;
+          --text:#e8ecf4; --muted:#9aa7c0; --accent:#5b8cff; --ok:#38c172;
+          --warn:#f4b942; --bad:#e35d6a; }
+  * { box-sizing:border-box; }
+  body { margin:0; font:16px/1.55 system-ui,-apple-system,'Segoe UI',sans-serif;
+         background:var(--bg); color:var(--text); }
+  header { padding:20px 24px; border-bottom:1px solid var(--line);
+           display:flex; flex-wrap:wrap; gap:12px; align-items:center;
+           justify-content:space-between; }
+  header h1 { margin:0; font-size:20px; }
+  header h1 span { color:var(--accent); }
+  .pill { font-size:13px; padding:4px 10px; border-radius:99px;
+          background:var(--card2); border:1px solid var(--line); color:var(--muted); }
+  .pill.online { color:var(--ok); border-color:var(--ok); }
+  main { max-width:960px; margin:0 auto; padding:24px 16px 64px; }
+  .card { background:var(--card); border:1px solid var(--line);
+          border-radius:12px; padding:20px; margin-bottom:20px; }
+  h2 { font-size:17px; margin:0 0 14px; }
+  label { display:block; font-size:13px; color:var(--muted); margin:12px 0 4px; }
+  textarea, input, select { width:100%; padding:9px 11px; border-radius:8px;
+    border:1px solid var(--line); background:var(--card2); color:var(--text);
+    font:inherit; }
+  textarea { min-height:76px; resize:vertical; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:4px 16px; }
+  button.primary { margin-top:16px; padding:11px 22px; border:0; border-radius:8px;
+    background:var(--accent); color:#fff; font-size:15px; font-weight:600; cursor:pointer; }
+  button.primary:hover { filter:brightness(1.1); }
+  button.primary:disabled { opacity:.55; cursor:wait; }
+  .badge { display:inline-block; font-weight:700; font-size:14px; padding:5px 14px;
+    border-radius:99px; margin-right:8px; }
+  .badge.PILOT { background:#1d4ed8; } .badge.FEASIBLE { background:#15803d; }
+  .badge.HOLD { background:#b45309; } .badge.NO-GO { background:#b91c1c; }
+  .badge.INSUFFICIENT_EVIDENCE { background:#6b7280; }
+  .chip { display:inline-block; font-size:12px; padding:2px 9px; border-radius:99px;
+    border:1px solid var(--line); color:var(--muted); margin-left:8px; vertical-align:middle; }
+  section.sec { border-top:1px solid var(--line); padding-top:14px; margin-top:14px; }
+  section.sec h3 { margin:0 0 6px; font-size:15px; color:var(--accent); }
+  ul { margin:6px 0; padding-left:22px; } li { margin:3px 0; }
+  .kv { margin:6px 0; } .kv b { color:var(--muted); font-weight:600; }
+  table { width:100%; border-collapse:collapse; font-size:14px; }
+  th, td { text-align:left; padding:7px 8px; border-bottom:1px solid var(--line); }
+  th { color:var(--muted); font-weight:600; }
+  .member { background:var(--card2); border:1px solid var(--line); border-radius:10px;
+    padding:12px 14px; margin-top:10px; }
+  .member h4 { margin:0 0 4px; font-size:14px; }
+  .member p { margin:4px 0; font-size:14px; }
+  .member p b { color:var(--muted); font-weight:600; }
+  .error { background:#3b1620; border:1px solid var(--bad); color:#ffb8c0; }
+  .error ul { margin-top:6px; }
+  .note { font-size:13px; color:var(--muted); margin-top:10px; }
+  code { background:var(--card2); padding:1px 6px; border-radius:5px; font-size:13px; }
+  a { color:var(--accent); }
+</style>
+</head>
+<body>
+<header>
+  <h1>Idea <span>Developer Council</span></h1>
+  <div style="display:flex;gap:8px;align-items:center">
+    <span id="llm" class="pill">…</span>
+    <span id="mem" class="pill">minne: …</span>
+  </div>
+</header>
+<main>
+  <div class="card">
+    <h2>1. Beskriv det du vill bygga</h2>
+    <label for="brief">Brief (minst en mening)</label>
+    <textarea id="brief" placeholder="Jag vill bygga en webbshop för hundägare med egen inloggning och betalning…"></textarea>
+    <div class="grid">
+      <div><label for="platform">Plattform</label>
+        <input id="platform" placeholder="webb / android-spel / android-app"></div>
+      <div><label for="users_target">Målgrupp</label>
+        <input id="users_target" placeholder="t.ex. Hundägare i Sverige"></div>
+      <div><label for="team_size">Team</label>
+        <input id="team_size" placeholder="1 utvecklare"></div>
+      <div><label for="deadline">Deadline (valfritt)</label>
+        <input id="deadline" placeholder="3 månader"></div>
+      <div><label for="budget">Budget (valfritt)</label>
+        <input id="budget" placeholder="0 kr"></div>
+      <div><label for="project_id">Projekt-id (valfritt)</label>
+        <input id="project_id" placeholder="t.ex. dogshop"></div>
+    </div>
+    <button class="primary" id="go">Få råd av rådet</button>
+    <div class="note">Rådet: CHAIR (samordnare) + CEO · TECH · DESIGN · OPS · FIN · LEGAL · MARK.
+      Full dokumentation: <a href="/docs">/docs</a> · <a href="/agents">/agents</a></div>
+  </div>
+
+  <div class="card" id="status"></div>
+  <div class="card" id="result" style="display:none"></div>
+  <div class="card" id="contrib" style="display:none"></div>
+</main>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"']/g,
+  c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+const LABELS = { decision:'Beslut', stack:'Teknikstack', architecture:'Arkitektur',
+  server:'Server & drift', legal:'Juridik', phases:'Etapper', risks:'Risker',
+  assumptions:'Antaganden', next_experiment:'Nästa experiment' };
+
+function renderValue(v) {
+  if (Array.isArray(v)) {
+    if (!v.length) return '<p class="note">—</p>';
+    if (v.every(x => x && typeof x === 'object')) return renderTable(v);
+    return '<ul>' + v.map(x => `<li>${esc(x)}</li>`).join('') + '</ul>';
+  }
+  if (v && typeof v === 'object') {
+    return Object.entries(v).map(([k, val]) =>
+      `<div class="kv"><b>${esc(k)}:</b> ${
+        Array.isArray(val) ? val.map(x => esc(x)).join(', ') : esc(val)}</div>`).join('');
+  }
+  return `<p>${esc(v)}</p>`;
+}
+
+function renderTable(rows) {
+  const cols = Object.keys(rows[0]);
+  return `<table><tr>${cols.map(c => `<th>${esc(LABELS[c] || c)}</th>`).join('')}</tr>` +
+    rows.map(r => `<tr>${cols.map(c => `<td>${esc(r[c])}</td>`).join('')}</tr>`).join('') +
+    '</table>';
+}
+
+async function boot() {
+  try {
+    const h = await (await fetch('/health')).json();
+    $('llm').textContent = 'LLM: ' + h.llm_mode;
+    $('llm').className = 'pill' + (h.llm_mode === 'online' ? ' online' : '');
+  } catch { $('llm').textContent = 'server nere'; }
+  try {
+    const m = await (await fetch('/memory/validate')).json();
+    $('mem').textContent = `minne: ${m.valid ? 'ok' : 'fel'} · rev ${m.revision}` +
+      ` · ${m.projects} projekt`;
+    $('mem').className = 'pill' + (m.valid ? ' online' : '');
+  } catch { $('mem').textContent = 'minne: okänt'; }
+}
+
+$('go').addEventListener('click', async () => {
+  const body = {
+    brief: $('brief').value.trim(),
+    restrictions: {
+      platform: $('platform').value.trim(),
+      users_target: $('users_target').value.trim(),
+      team_size: $('team_size').value.trim(),
+      deadline: $('deadline').value.trim() || null,
+      budget: $('budget').value.trim() || null,
+    },
+    project_id: $('project_id').value.trim() || null,
+  };
+  if (body.brief.length < 10) return showStatus('error',
+    'Skriv en kort beskrivning av vad du vill bygga (minst 10 tecken).');
+  $('go').disabled = true; $('go').textContent = 'Rådet diskuterar…';
+  $('result').style.display = 'none'; $('contrib').style.display = 'none';
+  try {
+    const res = await fetch('/roadmap', { method:'POST',
+      headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const data = await res.json();
+    if (!res.ok) { showStatus('error', 'Fel: ' + esc(data.detail || res.status)); return; }
+    if (data.status === 'INSUFFICIENT_EVIDENCE') { showStatus('error',
+      '<b>Rådet saknar underlag.</b> Komplettera: <ul>' +
+      data.missing.map(m => `<li>${esc(m)}</li>`).join('') + '</ul>'); return; }
+    showStatus('ok', `Rådet svarade · <b>${esc(data.decision.status)}</b> · klass ` +
+      `<b>${esc(data.task_class)}</b> · ${esc(data.mode)}-läge` +
+      (data.task_id ? ` · sparat som <code>${esc(data.task_id)}</code>` : ''));
+    renderRoadmap(data); renderContributions(data);
+  } catch (e) { showStatus('error', 'Nätverksfel: ' + esc(e)); }
+  finally { $('go').disabled = false; $('go').textContent = 'Få råd av rådet'; }
+});
+
+function showStatus(kind, html) {
+  $('status').style.display = 'block';
+  $('status').className = 'card' + (kind === 'error' ? ' error' : '');
+  $('status').innerHTML = html;
+}
+
+function renderRoadmap(d) {
+  const box = $('result'); box.style.display = 'block';
+  let html = `<h2>2. Roadmap — ${esc(d.project_id)}</h2>` +
+    `<span class="badge ${esc(d.decision.status)}">${esc(d.decision.status)}</span>` +
+    `<span class="chip">${esc(d.members.length)} medlemmar</span>` +
+    `<span class="chip">${esc(d.mode)}</span>`;
+  const sections = d.sections_order.filter(s => s !== 'decision');
+  for (const s of sections) {
+    if (d[s] === undefined) continue;
+    html += `<section class="sec"><h3>${esc(LABELS[s] || s)}</h3>${renderValue(d[s])}</section>`;
+  }
+  box.innerHTML = html;
+}
+
+function renderContributions(d) {
+  const box = $('contrib'); box.style.display = 'block';
+  box.innerHTML = '<h2>3. Rådets medlemmar</h2>' + d.contributions.map(c => `
+    <div class="member">
+      <h4>${esc(c.member)} <span class="chip">${esc(c.confidence || '')}</span>
+        <span class="chip">${esc(c.source || 'llm')}</span></h4>
+      <p><b>Bedomning:</b> ${esc(c.assessment)}</p>
+      <p><b>Rekommendation:</b> ${esc(c.recommendation)}</p>
+      <p><b>Risk:</b> ${esc(c.risk)}</p>
+      ${c.assumptions && c.assumptions.length
+        ? '<p><b>Antaganden:</b> ' + c.assumptions.map(a => esc(a)).join('; ') + '</p>' : ''}
+    </div>`).join('');
+}
+
+boot();
+</script>
+</body>
+</html>
+

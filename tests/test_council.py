@@ -100,5 +100,25 @@ class OfflinePipelineTest(unittest.TestCase):
         self.assertGreaterEqual(len(ctx['current_decisions']), 1)
 
 
+class UIApiTest(unittest.TestCase):
+    """Smoke tests for the built-in web UI (no httpx/TestClient needed)."""
+
+    def test_index_route_serves_existing_html(self):
+        from app.main import home
+        resp = home()
+        page = Path(str(resp.path))
+        self.assertTrue(str(page).endswith('static/index.html'))
+        html = page.read_text(encoding='utf-8')
+        self.assertIn('Idea Developer Council', html)
+        self.assertIn("fetch('/roadmap'", html)
+        self.assertIn('INSUFFICIENT_EVIDENCE', html)
+
+    def test_app_registers_root_route(self):
+        from app.main import app
+        paths = [r.path for r in app.routes]
+        self.assertIn('/', paths)
+        self.assertIn('/roadmap', paths)
+
+
 if __name__ == '__main__':
     unittest.main(verbosity=2)

@@ -4,6 +4,7 @@ import sys
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from pydantic import BaseModel, Field
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -11,6 +12,8 @@ sys.path.insert(0, str(ROOT))
 
 from app import council, llm, memory  # noqa: E402
 from app.roles import all_agents, council_order  # noqa: E402
+
+INDEX_HTML = Path(__file__).resolve().parent / 'static' / 'index.html'
 
 app = FastAPI(
     title='Idea Developer Council',
@@ -38,6 +41,12 @@ class RoadmapRequest(BaseModel):
     restrictions: Restrictions
     project_id: str | None = None
     store: bool = True
+
+
+@app.get('/', include_in_schema=False)
+def home() -> FileResponse:
+    """Webb-UI: formulär, roadmap-rendering och rådets bidrag."""
+    return FileResponse(INDEX_HTML)
 
 
 @app.get('/health')

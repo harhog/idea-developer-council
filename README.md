@@ -47,12 +47,20 @@ cp .env.example .env        # valfritt: lägg LLM_API_KEY för onlineläge
 uvicorn app.main:app --reload
 ```
 
+Öppna sedan **http://127.0.0.1:8000/** i webbläsaren — där finns ett
+inbyggt **webb-UI** (svenskt, mörkt, inga externa beroenden): fyll i brief
+och restriktioner, klicka **"Få råd av rådet"** och se beslut, roadmap-sektioner
+(etapper som tabell) och varje medlems bidrag renderade direkt. Statusraden
+visar LLM-läge (online/offline) och minnets hälsa. API-dokumentationen ligger
+kvar på `/docs`.
+
 Utan `LLM_API_KEY` körs rådet i **offline-läge**: heuristiska bidrag som
 fungerar utan nätverk (märkt `mode: "offline"`).
 
 ### API
 
 ```bash
+GET  /                       # webb-UI (HTML)
 GET  /health
 GET  /agents
 GET  /memory/validate
