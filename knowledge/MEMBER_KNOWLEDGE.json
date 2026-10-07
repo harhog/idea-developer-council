@@ -1,0 +1,97 @@
+{
+  "CEO": {
+    "primary_lens": "Lean Startup / effectuation",
+    "topics": [
+      "problem validation",
+      "value proposition",
+      "business model",
+      "MVP scope",
+      "go / no-go"
+    ],
+    "web_access_requested": true,
+    "corpus_status": "NOT_INGESTED",
+    "source_refs": ["LEAN-STARTUP", "EFFECTUATION"]
+  },
+  "FIN": {
+    "primary_lens": "Unit economics",
+    "topics": [
+      "cost of ownership",
+      "hosting budget",
+      "monetization",
+      "runway",
+      "build vs buy"
+    ],
+    "web_access_requested": true,
+    "corpus_status": "NOT_INGESTED",
+    "source_refs": ["UNIT-ECONOMICS"]
+  },
+  "TECH": {
+    "primary_lens": "Architecture and stack selection",
+    "topics": [
+      "language and framework choice",
+      "frontend",
+      "backend",
+      "database",
+      "third-party services",
+      "technical feasibility"
+    ],
+    "web_access_requested": true,
+    "corpus_status": "NOT_INGESTED",
+    "source_refs": ["TWELVE-FACTOR", "TECH-DECISION-ADR"]
+  },
+  "DESIGN": {
+    "primary_lens": "UX and accessibility",
+    "topics": [
+      "information architecture",
+      "UI patterns",
+      "accessibility (WCAG)",
+      "game feel",
+      "onboarding"
+    ],
+    "web_access_requested": true,
+    "corpus_status": "NOT_INGESTED",
+    "source_refs": ["WCAG22"]
+  },
+  "LEGAL": {
+    "primary_lens": "Compliance and risk",
+    "topics": [
+      "GDPR",
+      "privacy policy",
+      "terms of service",
+      "app store policies",
+      "licenses and IP",
+      "age ratings",
+      "consumer law"
+    ],
+    "web_access_requested": true,
+    "corpus_status": "NOT_INGESTED",
+    "source_refs": ["GDPR-ART", "EU-DIGITAL-SERVICES", "PLAY-STORE-POLICY"]
+  },
+  "MARK": {
+    "primary_lens": "Positioning and distribution",
+    "topics": [
+      "target audience",
+      "channel selection",
+      "ASO / SEO",
+      "launch plan",
+      "community"
+    ],
+    "web_access_requested": true,
+    "corpus_status": "NOT_INGESTED",
+    "source_refs": ["LEAN-STARTUP"]
+  },
+  "OPS": {
+    "primary_lens": "Delivery and operations",
+    "topics": [
+      "server and hosting choice",
+      "CI/CD",
+      "monitoring",
+      "scaling",
+      "backup and disaster recovery",
+      "release process"
+    ],
+    "web_access_requested": true,
+    "corpus_status": "NOT_INGESTED",
+    "source_refs": ["TWELVE-FACTOR", "SRE-BOOK"]
+  }
+}

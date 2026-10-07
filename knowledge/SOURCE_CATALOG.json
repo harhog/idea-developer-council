@@ -1,0 +1,107 @@
+{
+  "sources": [
+    {
+      "id": "LEAN-STARTUP",
+      "title": "The Lean Startup",
+      "author": "Eric Ries",
+      "locator": "Validated Learning, MVP, Build-Measure-Learn",
+      "coverage": "Full",
+      "license_basis": "Public summaries and citations only"
+    },
+    {
+      "id": "EFFECTUATION",
+      "title": "Effectuation: Elements of Entrepreneurial Expertise",
+      "author": "Saras Sarasvathy",
+      "locator": "Bird-in-hand, affordable loss, patchwork quilt",
+      "coverage": "Partial",
+      "license_basis": "Public summaries and citations only"
+    },
+    {
+      "id": "UNIT-ECONOMICS",
+      "title": "Unit economics for software products",
+      "author": "Public references",
+      "locator": "CAC, LTV, gross margin, run-rate, hosting cost models",
+      "coverage": "Partial",
+      "license_basis": "Public references"
+    },
+    {
+      "id": "TWELVE-FACTOR",
+      "title": "The Twelve-Factor App",
+      "author": "Adam Wiggins / Heroku",
+      "locator": "Codebase, config, backing services, processes, logs",
+      "coverage": "Full",
+      "license_basis": "MIT license"
+    },
+    {
+      "id": "TECH-DECISION-ADR",
+      "title": "Architecture Decision Records",
+      "author": "Michael Nygard and community",
+      "locator": "ADR format for stack and architecture choices",
+      "coverage": "Full",
+      "license_basis": "Creative Commons / community docs"
+    },
+    {
+      "id": "WCAG22",
+      "title": "Web Content Accessibility Guidelines 2.2",
+      "author": "W3C",
+      "locator": "Perceivable, Operable, Understandable, Robust",
+      "coverage": "Full",
+      "license_basis": "W3C document license"
+    },
+    {
+      "id": "GDPR-ART",
+      "title": "General Data Protection Regulation",
+      "author": "European Union",
+      "locator": "Art. 5-7, 13-14, 17, 25, 32",
+      "coverage": "Full",
+      "license_basis": "EU legal text (open)"
+    },
+    {
+      "id": "EU-DIGITAL-SERVICES",
+      "title": "EU Digital Services Act",
+      "author": "European Union",
+      "locator": "Transparency, risk assessment, notice and action",
+      "coverage": "Partial",
+      "license_basis": "EU legal text (open)"
+    },
+    {
+      "id": "PLAY-STORE-POLICY",
+      "title": "Google Play Developer Program Policies",
+      "author": "Google",
+      "locator": "Privacy, content, families, payments",
+      "coverage": "Partial",
+      "license_basis": "Public policy pages"
+    },
+    {
+      "id": "SRE-BOOK",
+      "title": "Site Reliability Engineering",
+      "author": "Google (Beyer et al.)",
+      "locator": "SLOs, monitoring, incident response, capacity",
+      "coverage": "Partial",
+      "license_basis": "Open access book"
+    }
+  ],
+  "cards": [
+    {
+      "id": "TECH-STACK-MVP",
+      "source_id": "TWELVE-FACTOR",
+      "members": ["TECH", "OPS"],
+      "summary": "Constraints for choosing a stack that can be deployed, configured and scaled without heroics.",
+      "limitations": ["Written for web services", "Does not cover native mobile game engines"]
+    },
+    {
+      "id": "CEO-VALIDATION",
+      "source_id": "LEAN-STARTUP",
+      "members": ["CEO", "MARK"],
+      "summary": "Validate the problem before committing to a build; smallest experiment first.",
+      "limitations": ["Assumes a customer-facing product", "Citation-level summary, not full text"]
+    },
+    {
+      "id": "LEGAL-GDPR-BASELINE",
+      "source_id": "GDPR-ART",
+      "members": ["LEGAL", "OPS"],
+      "summary": "Lawful basis, transparency, data minimisation and security baseline for any product handling EU personal data.",
+      "limitations": ["Not legal advice", "Country-level supplements not covered"]
+    }
+  ]
+}
