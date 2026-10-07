@@ -41,6 +41,10 @@ class RoadmapRequest(BaseModel):
     restrictions: Restrictions
     project_id: str | None = None
     store: bool = True
+    model: str | None = Field(
+        default=None,
+        description="Valfritt modell-id, t.ex. 'openrouter/free' eller "
+                    "'google/gemma-4-31b-it:free'. Default: CLINE_MODEL/LLM_MODEL.")
 
 
 @app.get('/', include_in_schema=False)
@@ -51,7 +55,16 @@ def home() -> FileResponse:
 
 @app.get('/health')
 def health():
-    return {'status': 'ok', 'llm_mode': 'online' if llm.online() else 'offline'}
+    return {'status': 'ok',
+            'llm_mode': 'online' if llm.online() else 'offline',
+            'model': llm._model() if llm.online() else None,
+            'base_url': llm._base()}
+
+
+@app.get('/models')
+def models():
+    """Modellista från API:t (gratis först), cachead 10 min; curatorerad fallback."""
+    return llm.list_models()
 
 
 @app.get('/agents')
@@ -71,6 +84,7 @@ def roadmap(req: RoadmapRequest):
             restrictions=req.restrictions.model_dump(),
             project_id=req.project_id,
             store=req.store,
+            model=req.model,
         )
     except RuntimeError as exc:
         raise HTTPException(status_code=502, detail=str(exc)) from exc

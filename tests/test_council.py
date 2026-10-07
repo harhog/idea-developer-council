@@ -2,6 +2,7 @@
 import shutil
 import sys
 import tempfile
+import time
 import unittest
 from pathlib import Path
 
@@ -87,6 +88,7 @@ class OfflinePipelineTest(unittest.TestCase):
             self.assertIn(section, result)
         self.assertEqual(len(result['phases']), 4)
         self.assertTrue(result['members'])
+        self.assertEqual(result['model'], 'offline')
 
     def test_intake_blocks_incomplete(self):
         result = council.run_council('hej', {}, store=False)
@@ -107,7 +109,7 @@ class UIApiTest(unittest.TestCase):
         from app.main import home
         resp = home()
         page = Path(str(resp.path))
-        self.assertTrue(str(page).endswith('static/index.html'))
+        self.assertTrue(str(page).replace('\\', '/').endswith('static/index.html'))
         html = page.read_text(encoding='utf-8')
         self.assertIn('Idea Developer Council', html)
         self.assertIn("fetch('/roadmap'", html)
@@ -118,6 +120,52 @@ class UIApiTest(unittest.TestCase):
         paths = [r.path for r in app.routes]
         self.assertIn('/', paths)
         self.assertIn('/roadmap', paths)
+
+
+class LLMModelsTest(unittest.TestCase):
+    """Model list + JSON tolerance + health info (no network)."""
+
+    def test_parse_models_free_first(self):
+        from app import llm
+        data = {'data': [{'id': 'paid/x'}, {'id': 'a/b:free'}, {'id': 'openrouter/free'}]}
+        models = llm.parse_models(data)
+        self.assertEqual(len(models), 3)
+        self.assertTrue(models[0]['free'], 'gratismodeller ska komma först')
+        by_id = {m['id']: m['free'] for m in models}
+        self.assertTrue(by_id['a/b:free'])
+        self.assertTrue(by_id['openrouter/free'])
+        self.assertFalse(by_id['paid/x'])
+
+    def test_extract_json_tolerates_fences_and_prose(self):
+        from app import llm
+        self.assertEqual(llm.extract_json('```json\n{"ok": true}\n```'), {'ok': True})
+        self.assertEqual(llm.extract_json('Här är svaret: {"ok": false} / slut'),
+                         {'ok': False})
+        with self.assertRaises(RuntimeError):
+            llm.extract_json('ingen json här')
+
+    def test_models_endpoint_uses_cache(self):
+        from app import llm
+        from app.main import models as models_route
+        seed = (llm._MODELS_CACHE['at'], llm._MODELS_CACHE['data'])
+        try:
+            llm._MODELS_CACHE['at'] = time.monotonic()
+            llm._MODELS_CACHE['data'] = {
+                'models': [{'id': 'x/y:free', 'free': True}],
+                'default': 'openrouter/free', 'source': 'live'}
+            out = models_route()
+            self.assertEqual(out['source'], 'live')
+            self.assertEqual(out['models'][0]['id'], 'x/y:free')
+            self.assertIn('default', out)
+        finally:
+            llm._MODELS_CACHE['at'], llm._MODELS_CACHE['data'] = seed
+
+    def test_health_reports_llm_state(self):
+        from app.main import health
+        h = health()
+        self.assertIn(h['llm_mode'], ('online', 'offline'))
+        self.assertIn('model', h)
+        self.assertIn('base_url', h)
 
 
 if __name__ == '__main__':

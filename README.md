@@ -42,31 +42,45 @@ obligatoriskt utdataformat. Kunskapsbasen ligger i
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env        # valfritt: lägg LLM_API_KEY för onlineläge
+cp .env.example .env        # lägg CLINE_API_KEY för online-läge (gratismodeller)
 
 uvicorn app.main:app --reload
 ```
 
 Öppna sedan **http://127.0.0.1:8000/** i webbläsaren — där finns ett
 inbyggt **webb-UI** (svenskt, mörkt, inga externa beroenden): fyll i brief
-och restriktioner, klicka **"Få råd av rådet"** och se beslut, roadmap-sektioner
+och restriktioner, välj **modell** (gratismodeller först, sparas lokalt i
+webbläsaren), klicka **"Få råd av rådet"** och se beslut, roadmap-sektioner
 (etapper som tabell) och varje medlems bidrag renderade direkt. Statusraden
 visar LLM-läge (online/offline) och minnets hälsa. API-dokumentationen ligger
 kvar på `/docs`.
 
-Utan `LLM_API_KEY` körs rådet i **offline-läge**: heuristiska bidrag som
-fungerar utan nätverk (märkt `mode: "offline"`).
+### Online-läge & gratismodeller
+
+Med `CLINE_API_KEY` i `.env` (samma Cline API som `idea-council` — skapa nyckel
+på app.cline.bot) svarar alla rådets medlemmar **online** via vald modell:
+
+- `GET /models` listar modeller från API:t (cacheat 10 min), **gratismodeller
+  först** (`:free`-suffix + `openrouter/free`), med curatorerad fallback.
+- Valet skickas som `"model"` i `POST /roadmap` (UI:t sparar det i localStorage).
+- Medlemmarna körs **parallellt** — ronden svarar på drygaste medlemmens tid.
+- Grátisrouternar kan ibland svara skräp/trunkerad JSON; `app/llm.py` gör
+  omförsök och reparerar innan medlemmen fallerar till offline-stubben
+  (`llm_errors` i svaret). Rådet svarar alltid.
+- Utan nyckel (eller om enstaka medlemmar misslyckas) körs **offline-läge**:
+  heuristiska bidrag, märkt `mode: "offline"`.
 
 ### API
 
 ```bash
 GET  /                       # webb-UI (HTML)
-GET  /health
+GET  /health                 # llm_mode + vald modell
+GET  /models                 # modellista (gratis först), cachead 10 min
 GET  /agents
 GET  /memory/validate
 GET  /memory/projects
 GET  /memory/context/{project_id}/{member}?task_class=web
-POST /roadmap
+POST /roadmap                # valfritt fält: "model": "openrouter/free"
 ```
 
 ```bash
@@ -78,7 +92,8 @@ curl -X POST http://127.0.0.1:8000/roadmap -H "Content-Type: application/json" -
     "team_size": "1 utvecklare",
     "budget": "0 kr"
   },
-  "project_id": "dogshop"
+  "project_id": "dogshop",
+  "model": "openrouter/free"
 }'
 ```
 
@@ -100,7 +115,7 @@ OBSERVERA: `<root>` kommer **efter** subkommandot.
 ```bash
 python tests/test_council_memory.py     # 10 tester
 python tests/test_member_knowledge.py   # 6 tester
-python tests/test_council.py            # 14 tester (routing + offline-pipeline)
+python tests/test_council.py            # 20 tester (routing + offline + UI + modeller)
 ```
 
 Körs direkt (ingen `unittest discover`), som i CI.

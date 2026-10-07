@@ -83,6 +83,8 @@
         <input id="deadline" placeholder="3 månader"></div>
       <div><label for="budget">Budget (valfritt)</label>
         <input id="budget" placeholder="0 kr"></div>
+      <div><label for="model">Modell (gratis först)</label>
+        <select id="model"><option value="">Laddar modeller…</option></select></div>
       <div><label for="project_id">Projekt-id (valfritt)</label>
         <input id="project_id" placeholder="t.ex. dogshop"></div>
     </div>
@@ -126,9 +128,11 @@ function renderTable(rows) {
 }
 
 async function boot() {
+  loadModels();
   try {
     const h = await (await fetch('/health')).json();
-    $('llm').textContent = 'LLM: ' + h.llm_mode;
+    $('llm').textContent = h.llm_mode === 'online'
+      ? `LLM: online · ${h.model || ''}` : 'LLM: offline (ingen nyckel)';
     $('llm').className = 'pill' + (h.llm_mode === 'online' ? ' online' : '');
   } catch { $('llm').textContent = 'server nere'; }
   try {
@@ -139,9 +143,39 @@ async function boot() {
   } catch { $('mem').textContent = 'minne: okänt'; }
 }
 
+const MKEY = 'idc-model';
+async function loadModels() {
+  const sel = $('model');
+  try {
+    const d = await (await fetch('/models')).json();
+    const models = d.models || [];
+    if (!models.length) throw new Error('tom');
+    sel.innerHTML = '';
+    const saved = localStorage.getItem(MKEY) || '';
+    const free = document.createElement('optgroup'); free.label = 'Gratis';
+    const paid = document.createElement('optgroup'); paid.label = 'Betald / standard';
+    models.forEach(m => {
+      const o = document.createElement('option');
+      o.value = m.id; o.textContent = m.id + (m.free ? '  ★ gratis' : '');
+      if (m.id === saved) o.selected = true;
+      (m.free ? free : paid).append(o);
+    });
+    sel.append(free, paid);
+    if (![...sel.options].some(o => o.selected)) {
+      const f = models.find(m => m.free) || models[0];
+      const o = [...sel.options].find(x => x.value === f.id);
+      if (o) { o.selected = true; if (!saved) localStorage.setItem(MKEY, f.id); }
+    }
+  } catch {
+    sel.innerHTML = '<option value="">Offline (modellista ej tillgänglig)</option>';
+  }
+}
+$('model').onchange = () => localStorage.setItem(MKEY, $('model').value);
+
 $('go').addEventListener('click', async () => {
   const body = {
     brief: $('brief').value.trim(),
+    model: $('model').value || null,
     restrictions: {
       platform: $('platform').value.trim(),
       users_target: $('users_target').value.trim(),
@@ -165,6 +199,8 @@ $('go').addEventListener('click', async () => {
       data.missing.map(m => `<li>${esc(m)}</li>`).join('') + '</ul>'); return; }
     showStatus('ok', `Rådet svarade · <b>${esc(data.decision.status)}</b> · klass ` +
       `<b>${esc(data.task_class)}</b> · ${esc(data.mode)}-läge` +
+      ` · modell <code>${esc(data.model || '—')}</code>` +
+      (data.llm_errors ? ` · <b>${data.llm_errors.length} LLM-fel</b> (fallback)` : '') +
       (data.task_id ? ` · sparat som <code>${esc(data.task_id)}</code>` : ''));
     renderRoadmap(data); renderContributions(data);
   } catch (e) { showStatus('error', 'Nätverksfel: ' + esc(e)); }
