@@ -57,6 +57,10 @@
   .note { font-size:13px; color:var(--muted); margin-top:10px; }
   code { background:var(--card2); padding:1px 6px; border-radius:5px; font-size:13px; }
   a { color:var(--accent); }
+  td button { background:var(--card2); border:1px solid var(--line);
+    color:var(--text); border-radius:6px; padding:4px 11px; cursor:pointer;
+    font:inherit; font-size:13px; }
+  td button:hover { border-color:var(--accent); color:var(--accent); }
 </style>
 </head>
 <body>
@@ -88,7 +92,9 @@
       <div><label for="project_id">Projekt-id (valfritt)</label>
         <input id="project_id" placeholder="t.ex. dogshop"></div>
     </div>
-    <button class="primary" id="go">Få råd av rådet</button>
+  <p class="note">Varje rondo sparas automatiskt i minnet — bläddra bland
+     <b>tidigare svar</b> längre ner på sidan.</p>
+  <button class="primary" id="go">Få råd av rådet</button>
     <div class="note">Rådet: CHAIR (samordnare) + CEO · TECH · DESIGN · OPS · FIN · LEGAL · MARK.
       Full dokumentation: <a href="/docs">/docs</a> · <a href="/agents">/agents</a></div>
   </div>
@@ -96,6 +102,11 @@
   <div class="card" id="status"></div>
   <div class="card" id="result" style="display:none"></div>
   <div class="card" id="contrib" style="display:none"></div>
+
+  <div class="card" id="history-card">
+    <h2>4. Tidigare svar</h2>
+    <div id="history-list" class="note">Laddar historik…</div>
+  </div>
 </main>
 <script>
 const $ = id => document.getElementById(id);
@@ -129,6 +140,7 @@ function renderTable(rows) {
 
 async function boot() {
   loadModels();
+  loadHistory();
   try {
     const h = await (await fetch('/health')).json();
     $('llm').textContent = h.llm_mode === 'online'
@@ -203,6 +215,7 @@ $('go').addEventListener('click', async () => {
       (data.llm_errors ? ` · <b>${data.llm_errors.length} LLM-fel</b> (fallback)` : '') +
       (data.task_id ? ` · sparat som <code>${esc(data.task_id)}</code>` : ''));
     renderRoadmap(data); renderContributions(data);
+    loadHistory();
   } catch (e) { showStatus('error', 'Nätverksfel: ' + esc(e)); }
   finally { $('go').disabled = false; $('go').textContent = 'Få råd av rådet'; }
 });
@@ -239,6 +252,51 @@ function renderContributions(d) {
       ${c.assumptions && c.assumptions.length
         ? '<p><b>Antaganden:</b> ' + c.assumptions.map(a => esc(a)).join('; ') + '</p>' : ''}
     </div>`).join('');
+}
+
+async function loadHistory() {
+  const box = $('history-list');
+  try {
+    const d = await (await fetch('/history')).json();
+    const runs = d.runs || [];
+    if (!runs.length) {
+      box.innerHTML = 'Inga sparade svar ännu — gör en rondo så sparas ' +
+        'resultatet här automatiskt.';
+      return;
+    }
+    box.innerHTML = '<table><tr><th>Datum (UTC)</th><th>Brief</th><th>Beslut</th>' +
+      '<th>Läge</th><th>Modell</th><th></th></tr>' +
+      runs.map(r => `<tr>
+        <td>${esc(String(r.at || '').replace('T', ' ').slice(0, 16))}</td>
+        <td>${esc(String(r.brief || '').slice(0, 90))}${
+          String(r.brief || '').length > 90 ? '…' : ''}</td>
+        <td><span class="badge ${esc(r.decision || '')}">${esc(r.decision || '—')}</span></td>
+        <td>${esc(r.mode || '—')}${r.llm_errors ? ` · ${r.llm_errors} fel` : ''}${
+          r.memory_error ? ' · minnefel' : ''}</td>
+        <td><code>${esc(r.model || '—')}</code></td>
+        <td><button data-run="${esc(r.run_id)}">Visa</button></td>
+      </tr>`).join('') + '</table>';
+    box.querySelectorAll('button[data-run]').forEach(b =>
+      b.addEventListener('click', () => showRun(b.dataset.run)));
+  } catch (e) {
+    box.innerHTML = 'Kunde inte ladda historiken: ' + esc(e);
+  }
+}
+
+async function showRun(runId) {
+  try {
+    const entry = await (await fetch('/history/' + encodeURIComponent(runId))).json();
+    const d = entry.roadmap || entry;
+    showStatus('ok', `Visar sparat svar · <code>${esc(entry.run_id || runId)}</code>` +
+      ` · ${esc(String(entry.at || '').replace('T', ' '))} UTC` +
+      ` · <b>${esc(d.decision?.status || d.decision || '—')}</b>` +
+      ` · ${esc(d.mode || '—')} · <code>${esc(d.model || '—')}</code>` +
+      (entry.llm_errors ? ` · ${entry.llm_errors} LLM-fel` : ''));
+    renderRoadmap(d); renderContributions(d);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  } catch (e) {
+    showStatus('error', 'Kunde inte visa körningen: ' + esc(e));
+  }
 }
 
 boot();

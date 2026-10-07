@@ -1,8 +1,303 @@
 {
   "schema_version": 1,
   "revision": 0,
-  "projects": {},
-  "episodes": {},
+  "projects": {
+    "proj-3355968c": {
+      "id": "proj-3355968c",
+      "name": "proj-3355968c",
+      "aliases": [],
+      "created": "2026-10-07T14:34:10.626823+00:00",
+      "last_updated": "2026-10-07T14:34:10.626836+00:00"
+    },
+    "proj-0f8d61b7": {
+      "id": "proj-0f8d61b7",
+      "name": "proj-0f8d61b7",
+      "aliases": [],
+      "created": "2026-10-07T15:28:29.035113+00:00",
+      "last_updated": "2026-10-07T15:28:29.035125+00:00"
+    }
+  },
+  "episodes": {
+    "T-6e64677d": {
+      "task_id": "T-6e64677d",
+      "project_id": "proj-3355968c",
+      "question": "jag vill skapa mobil spel ,, återuppleva gamla spel som t.ex river raid  och sälja dem för ca 1 dollar på google play .",
+      "task_class": "game",
+      "mode": "STANDARD",
+      "participants": [
+        "CEO",
+        "TECH",
+        "DESIGN",
+        "OPS",
+        "FIN",
+        "LEGAL",
+        "MARK"
+      ],
+      "state": "CLOSED",
+      "evidence": [],
+      "contributions": {
+        "CEO": {
+          "member": "CEO",
+          "assessment": "Idé kräver problemvalidering före stackval.",
+          "risk": "LLM-fel, heuristik användes: LLM HTTP 500: {\"error\":\"empty response content\",\"success\":false}\n",
+          "recommendation": "Validera problemet med ett litet experiment innan bygge (E0).",
+          "assumptions": [
+            "offline-läge: inget LLM_API_KEY satt"
+          ],
+          "confidence": "Low",
+          "reflection": "Ersättningsbidrag i offline-läge; behöver verifieras.",
+          "evidence_refs": [],
+          "created": "2026-10-07T14:34:10.626865+00:00"
+        },
+        "TECH": {
+          "member": "TECH",
+          "assessment": "Tekniskt möjligt att bygga en enkel 2D-arcadekopia på Android inom en månad med en person, men idén 'återuppleva gamla spel som River Raid' krockar direkt med upphovsrätt. Koden är inte problemet, rättigheterna till spelmechanikerna och asseten är det. Att sälja en kopia av ett skyddat spel är olagligt och riskerar att stänga ditt Google Play-konto.",
+          "risk": "Hög risk för upphovsrättsintrång (Activision äger River Raid). Google Play kan ta bort appen och stänga kontot. Barninriktning kräver strikt efterlevnad av COPPA/Google Play Made for Kids policy (inga spårnings-API, ingen reklam, begränsad datainsamling). Låg konvertering för en $1-app jämfört med gratisalternativ.",
+          "recommendation": "Primär stack: Godot Engine (2D) + GDScript, exportera som AAB till Google Play. Motivering: Öppen källkod, inga royalties, lättviktigt för 2D, snabb iteration för solo-utveckl",
+          "assumptions": null,
+          "confidence": "Moderate",
+          "reflection": "Modellen gav ingen separat eftertanke; bedömningen ovan gäller.",
+          "evidence_refs": [],
+          "created": "2026-10-07T14:34:10.626877+00:00"
+        },
+        "DESIGN": {
+          "member": "DESIGN",
+          "assessment": "1. Kontrollschema: River Raid kräver simultan framåtrörelse och sidorörelse. På touch är detta kritiskt. Använd 'Tap-to-steer' (berör vänster/höger skärmkant) eller två virtuella stavar. Enligt Fitts's lag: minimera avstånd till måltavlan, touchzoner bör täcka minst 30% av skärmhöjden. 2. Tillgänglighet: WCAG 2.1 AA. UI-kontrast minst 4.5:1. Färgblindläge (terrängkodning via form/färg). Ljudfeedback för skador och poäng för synnedsatta. 3. Onboarding: Inga texttutorialer. 'Show, don't tell' via visuella cues. Spelet startar direkt i action. 4. IP-säkerhet: River Raid är skyddad av Atari. Gör en 'spiritual successor' utan kopierade assets eller kod. 5. Målgrupp: Barn <13 kan inte köpa själv (Google policy/COPPA). Designa för tonåringar eller föräldrar. Inga chattfunktioner.",
+          "risk": "IP-stämning (River Raid är varumärkesskyddat) och kontrollfriktion på små skärmar som leder till dåliga recensioner. Solo-utvecklare riskerar scope creep inom 1 månad.",
+          "recommendation": "Primär: 'Arcade Touch-First' med adaptiv styrning (automatisk framåtrörelse, styrning via skärmzoner) + pixelart + stark game feel (skärmviskel, partikeleffekter, skakning). Alternativ: HTML5/WebGL-prototyp för kontrollvalidering innan Android-build. Byt åsikt om: >40% av testspelare misslyckas i första minuten pga styrning, eller om IP-risken bedöms för hög.",
+          "assumptions": [
+            "Deadline '1' tolkas som 1 månad.",
+            "Budget finns för inköp av assets/ljud.",
+            "Målgruppen (tonåringar) har betalkort kopplat till Google Play.",
+            "Inga annonser, enbart engångsköp på $1.",
+            "Inga in-app-chattar eller sociala funktioner."
+          ],
+          "confidence": "Moderate",
+          "reflection": "Spänningen ligger mellan retro-fidelitet och modern touch-UX. Barn och tonåringar kräver omedelbar feedback; text är död. IP-risken",
+          "evidence_refs": [],
+          "created": "2026-10-07T14:34:10.626887+00:00"
+        },
+        "OPS": {
+          "member": "OPS",
+          "assessment": "Drift simplast möjliga initialt.",
+          "risk": "LLM-fel, heuristik användes: LLM HTTP 500: {\"error\":\"empty response content\",\"success\":false}\n",
+          "recommendation": "En miljö + CI från dag 1; PaaS före egen server vid litet team.",
+          "assumptions": [
+            "offline-läge: inget LLM_API_KEY satt"
+          ],
+          "confidence": "Low",
+          "reflection": "Ersättningsbidrag i offline-läge; behöver verifieras.",
+          "evidence_refs": [],
+          "created": "2026-10-07T14:34:10.626895+00:00"
+        },
+        "FIN": {
+          "member": "FIN",
+          "assessment": "Kostnad behöver band, inte punktskatt.",
+          "risk": "LLM-fel, heuristik användes: LLM HTTP 500: {\"error\":\"empty response content\",\"success\":false}\n",
+          "recommendation": "Håll drift under månadsbandet tills första intäkt; räkna intervall.",
+          "assumptions": [
+            "offline-läge: inget LLM_API_KEY satt"
+          ],
+          "confidence": "Low",
+          "reflection": "Ersättningsbidrag i offline-läge; behöver verifieras.",
+          "evidence_refs": [],
+          "created": "2026-10-07T14:34:10.626908+00:00"
+        },
+        "LEGAL": {
+          "member": "LEGAL",
+          "assessment": "Baseline-compliance krävs före lansering.",
+          "risk": "LLM-fel, heuristik användes: LLM HTTP 500: {\"error\":\"empty response content\",\"success\":false}\n",
+          "recommendation": "Integritetspolicy + villkor före publicering; GDPR om persondata.",
+          "assumptions": [
+            "offline-läge: inget LLM_API_KEY satt"
+          ],
+          "confidence": "Low",
+          "reflection": "Ersättningsbidrag i offline-läge; behöver verifieras.",
+          "evidence_refs": [],
+          "created": "2026-10-07T14:34:10.626916+00:00"
+        },
+        "MARK": {
+          "member": "MARK",
+          "assessment": "Distribution behöver en kanalhypotes.",
+          "risk": "LLM-fel, heuristik användes: Kunde inte tolka JSON från modellen: {\"assessment\": \"Affärsmodellen är strukturellt bristfällig för den angivna målgruppen. Barn och ungdomar har sällan tillgång till egna betalningsmedel, och föräldr",
+          "recommendation": "En organisk kanal först; betalt först efter bevis.",
+          "assumptions": [
+            "offline-läge: inget LLM_API_KEY satt"
+          ],
+          "confidence": "Low",
+          "reflection": "Ersättningsbidrag i offline-läge; behöver verifieras.",
+          "evidence_refs": [],
+          "created": "2026-10-07T14:34:10.626924+00:00"
+        }
+      },
+      "decision": {
+        "status": "PILOT",
+        "reason": "Rådet rekommenderar pilot: bygg litet, mät, skala sedan",
+        "adil_result": null,
+        "founder_choice": null,
+        "founder_choice_source": null
+      },
+      "outcome": {
+        "status": "PENDING",
+        "evidence_refs": [],
+        "summary": null
+      },
+      "created": "2026-10-07T14:34:10.626849+00:00",
+      "updated": "2026-10-07T14:34:10.626936+00:00"
+    },
+    "T-333db742": {
+      "task_id": "T-333db742",
+      "project_id": "proj-0f8d61b7",
+      "question": "Jag vill bygga en mobilapp dar cyklister kan planera rutter, se profilen och dela turer med vanner. Viss social del och statisik.",
+      "task_class": "app",
+      "mode": "STANDARD",
+      "participants": [
+        "CEO",
+        "TECH",
+        "DESIGN",
+        "OPS",
+        "FIN",
+        "LEGAL",
+        "MARK"
+      ],
+      "state": "CLOSED",
+      "evidence": [],
+      "contributions": {
+        "CEO": {
+          "member": "CEO",
+          "assessment": "Cyclister i Sverige behöver ett enkelt sätt att planera rutter med höjdprofil, se statistik och dela turer med vänner utan att behöva betala för premiumfunktioner i befintliga appar. Befintliga lösningar (Strava, Komoot, Ride with GPS) är antingen komplexa, kostar pengar eller saknar tydlig svensk fokus. En lättviktsapp som använder öppna kartdata (OSM) och erbjuder grundläggande ruttplanering, höjdprofil, enkel delning via länk och grundläggande statistik kan fylla luckan om den är gratis och snabb.",
+          "risk": "Den största risken är användaranskaffning och kvarhållning: med begränsad marknadsbudget kan det vara svårt att nå tillräckligt många svenska cyklister för att validera efterfrågan, vilket kan leda till låg aktivitet och därmed ogiltiga antaganden om värde.",
+          "recommendation": "GO – bygg en MVP som fokuserar på: 1) offline/online kartbaserad ruttplanering med OSM, 2) höjdprofil och distans/tid, 3) spara rutt lokalt, 4) dela rutt som länk eller fil, 5) enkel profil och grundläggande statistik (totalt km, höjdmetrar). Detta kan göras med en ensam utvecklare med hjälp av gratis bibliotek (Mapsforge, OSMDroid, Room) och håller sig inom budgeten 1000 kr/månad (ingen betald karttjänst). Alternativt skulle man kunna pivota mot en ren delningsplattform för befintliga GPX-filer om kartkostnader blir för höga.",
+          "assumptions": [
+            "Svenska cyklister kommer att använda en gratis app som erbjuder grundläggande ruttplanering och delning utan behov av avancerade sociala funktioner.",
+            "OpenStreetMap-kartor via gratis bibliotek (OSMDroid/Mapsforge) kommer att hålla sig inom de kostnadsfria användningsgränserna för projektets skala.",
+            "En ensam utvecklare kan implementera kärnfunktionen (ruttplanering, höjdprofil, delning) inom rimlig tid givet befintliga öppna källkodsbibliotek."
+          ],
+          "confidence": "Moderate",
+          "reflection": "Jag har antagit att kartkostnader förblir noll genom att använda OSM; om detta visar sig vara fel (t.ex. behov av högre zoomnivåer eller trafiklager) kan budgeten överskridas och kräva en pivot mot enbart GPX-delning eller en prenumerationsmodell.",
+          "evidence_refs": [],
+          "created": "2026-10-07T15:28:29.035148+00:00"
+        },
+        "TECH": {
+          "member": "TECH",
+          "assessment": "Tekniskt möjligt men utmanande med 1 utvecklare och 1000 kr/mån. Kärnfunktioner: kartor (Google Maps SDK for Android), ruttplanering (OpenRouteService API), användarprofiler (Firebase Auth + Firestore), social delning (Firestore eller Firebase Realtime Database). Kostnaden för Google Maps SDK kan snabbt överskrida budgeten vid hög användning. Alternativt använda OSM-baserade lösningar (Mapsforge, Organic Maps SDK) för att minska kostnader. Firebase erbjuder ett gratis tier som kan räcka för en liten användarebas. Offline-stöd kräver lokal cachning av kartor och rutter, vilket ökar komplexiteten. Rekommenderas att börja med en enkel prototyp med online-kartor och fokusera på core UX innan offline-funktionalitet läggs till.",
+          "risk": "Hög risk: Google Maps SDK kostar $200/mån efter gratiskvoten (28 000 månader). Med 1000 kr/mån ($100) riskerar kostnaden att överskrida budgeten vid moderat användning. Alternativt krävs avvikelser från Google (t.ex. OSM), vilket ökar utvecklingstiden. Utvecklarresursen (1 person) kan inte hantera både kartlogik, social funktionalitet och statistik samtidigt utan tydlig prioritering.",
+          "recommendation": "Använd React Native med React Navigation för två-vetenskapplattformstillväg. Kartor via react-native-maps (Google Maps på Android). Backend via Firebase (Auth, Firestore, Storage). API för ruttplanering via OpenRouteService (1000 gratis begäran/dag). Detta ger snabb iteration och enkel distribution. Alternativt: Kotlin-native Android-app med direkt Google Maps SDK och Firebase. Byt om prestanda krävs eller om React Native-begränsningar påverkar kartintegrationen negativt.",
+          "assumptions": [
+            "Användaren har grundläggande kunskaper i React Native och Firebase.",
+            "Offline-stöd inte krävs i MVP-fasen.",
+            "Social interaktion (vänbok, kommentarer) håller sig enkel.",
+            "Ingen krav på realtidsspårning av cykelposition.",
+            "Användarna accepterar att delade turer lagras på centraliserad server (Firebase)."
+          ],
+          "confidence": "Moderate",
+          "reflection": "Med begränsad budget och resurs måste fokus ligga på att snabbt leverera en fungerande prototyp med core funktioner (karta, ruttplanering, profil). Firebase ger snabb backend-utveckling men kan bli dyrt. Att börja med React Native ger flexibilitet att expandera till iOS senare utan dubbelarbete. Viktigt att validera marknadsdemand innan stora tekniska investeringar görs.",
+          "evidence_refs": [],
+          "created": "2026-10-07T15:28:29.035160+00:00"
+        },
+        "DESIGN": {
+          "member": "DESIGN",
+          "assessment": "För att förstå cyklisters behov gör vi: 1) Persona‑ och intervju‑studier med 5–7 svenska pendlar‑ och fritidscyklister (remote eller på lokala cykelklubbar). 2) Journey‑mapping av huvudscenariot: upptäcka app → skapa konto → lägga ut waypoints på karta → se höjdprofil → spara/dela → se vännernas turer. 3) Information‑arkitektur: skärm‑karta med fyra primära nav‑punkter (Start, Ruttplanerare, Mina turer, Socialt flöde) plus inställningar. 4) Wireframes i Figma (low‑fidelity) följt av klickbar prototyp för snabb användartestning (5 användare, think‑aloud). 5) Tillgänglighetsgenomgång enligt WCAG 2.1 AA: touchmått ≥48 dp, färgkontrast ≥4.5:1 för text och ikoner, innehållsbeskrivningar för alla ikoner, stöd för TalkBack och dynamiska teckenstorlekar. 6) Teknisk utvärdering av kartleverantörer: OpenStreetMap‑baserade SDKs (Mapbox gratis tier, OSMBonusPack) vs Google Maps (kostnadsrisk). 7) Höjdprofil‑tjänst: Open‑Elevation API (gratis, begränsad till 1000 req/dag) eller SRTM‑data cachad lokalt. 8) Delning: Android‑Intent ACTION_SEND med GPX/JSON samt deep‑link till appen. 9) Statistik: lokal Room‑databas med aggregerad distans, tid, höjdgain; valfri synk till Firebase‑Firestore (gratis tier) för vän‑flöde. Detta ger en konkret grund för UI‑flöden, tillgänglighetskrav och tekniska val som passar en ensam utvecklare med begränsad budget.",
+          "risk": "Den största risken är oväntade kostnader eller användningsgränser för kart‑ och höjdprofil‑API:er. Om appen får mer än den kostnadsfria nivån hos t.ex. Mapbox eller Open‑Elevation kan månadskostnaden snabbt överstiga 1000 kr, vilket skulle tvinga antingen nedskärning av kärnfunktioner eller överstigande budget. Eftersom utvecklaren ensam står för både kod och drift finns liten marginal för att förhandla eller byta leverantör mitt i projektet.",
+          "recommendation": "Primär rekommendation: Bygg appen med Jetpack Compose och Material Design 3, använd en gratis OSM‑baserad kartlösning (Mapbox gratis tier eller OSMBonusPack) och hämta höjddata från Open‑Elevation med lokal cachning för att hålla API‑anrop under gratisgränsen. Implementera kärnflödet i fyra huvudskärmar (Start, Ruttplanerare med waypoint‑drag, Höjdprofil‑vy, Mina turer + Socialt flöde) och följ Android‑tillgänglighetschecklisten (48 dp touch, 4.5 % kontrast, innehållsbeskrivningar, TalkBack‑test). Detta ger ett modernt, konsekvent UI som är snabbt att iterera med Compose deklarativ syntax och minskar behovet av XML‑underhåll. Alternativ: Använd traditionella XML‑layouter med ViewBinding och Navigation‑komponenten. Detta alternativ skulle väljas om utvecklaren upplever att Compose‑inlärningskurvan eller byggtiderna för låg‑prestandade Android‑enheter blir ett hinder, eftersom XML‑baserad UI är mer förutsägbar i prestanda och har större community‑stöd för felsökning. Jag skulle byta åsikt om profilering visar att Compose‑appen överstiger 16 ms/ram på mål‑enheter eller om kartleverantörens gratis tier visar sig otillräcklig efter första månadens faktisk användning.",
+          "assumptions": [
+            "Användarbasen är liten nog att gratis‑tier för kart‑ och höjd‑API räcker för minst de första 3‑6 månaderna.",
+            "Utvecklaren kan lära sig Jetpack Compose tillräckligt snabbt (inom 2 veckor) för att inte fördröja kärnfunktionen.",
+            "Backend‑behov kan täckas av lokal Room‑databas med occasional Firebase‑Firestore synk för vän‑flöde; ingen egen server behövs.",
+            "Sveriges cyklister accepterar att appen primärt är på svenska med möjlighet att växla till engelska via systeminställningar.",
+            "En enkel social funktion (flöde av offentliga turer + följa vänner) räcker för initialt engagemang; avancerade funktioner som grupprutter eller tävlingar kan skjutas upp."
+          ],
+          "confidence": "Moderate",
+          "reflection": "Balanserade behovet av ett tillgängligt, modernt UI med begränsad tid och budget ledde till valet av deklarativ Compose och gratis OSM‑baserad kartstack, samtidigt som jag höll öppet för ett mer traditionellt XML‑alternativ ifall prestanda eller inlärning blir ett hinder.",
+          "evidence_refs": [],
+          "created": "2026-10-07T15:28:29.035175+00:00"
+        },
+        "OPS": {
+          "member": "OPS",
+          "assessment": "För ett cykelrutt-app med social funktionalitet, profilhantering och statistik, är en molnbaserad lösning med serverlös arkitektur (t.ex. Firebase eller AWS Amplify) mest lämplig. Detta minskar operativ komplexitet för en ensam utvecklare. Firebase erbjuder inbyggda funktioner som autentisering, realtidsdatabaser och hosting, vilket snabbar upp utvecklingen. För en Android-app med social interaktion och statistik behövs en backend med API-stöd, vilket Firebase eller en liten VPS (t.ex. en liten DigitalOcean eller AWS EC2) kan tillhandahålla. Firebase har en gratis nivå som räcker för en liten användarebas, medan en VPS skulle kräva mer konfiguration och underhåll. För CI/CD kan GitHub Actions användas för att automatisera bygg och distribution till Google Play. För övervakning och felhantering kan Firebase Crashlytics och Analytics användas. Backup och återställning hanteras automatiskt av Firebase, medan en VPS skulle kräva manuella säkerhetskopieringar.",
+          "risk": "Den största risken är att appen blir otecknat av användare på grund av dålig prestanda eller fel i ruttplaneringen. För att minska detta måste API:er för kartor och ruttplanering (t.ex. Google Maps eller OpenStreetMap) integreras korrekt, och appen måste testas grundligt innan lansering.",
+          "recommendation": "Använd Firebase som backendplattform för att snabbt bygga en skalbar och underhållsfri lösning. Firebase erbjuder autentisering, databas, och hosting med en gratis nivå som passar budgeten. För CI/CD använd GitHub Actions för att automatisera bygg och distribution. För alternativ, om du föredrar mer kontroll, kan du använda en liten VPS (t.ex. DigitalOcean) med en Node.js-backend, men detta kräver mer tid och expertis. Byt åsikt om du behöver mer anpassning eller har fler resurser.",
+          "assumptions": [
+            "Firebase gratis nivå räcker för initial användarebas under 1000 aktiva användare",
+            "Google Maps API-kostnader förblir rimliga under 1000 kr/månad",
+            "GitHub Actions kan användas kostnert gratis för en ensam utvecklare",
+            "Android-app kan byggas med Jetpack Compose eller Flutter för tvärenhetsutveckling",
+            "Användare kommer främst från Sverige, så lokala kartor och cykelvägar är viktiga"
+          ],
+          "confidence": "High",
+          "reflection": "Att använda Firebase minskar komplexiteten av serverhantering, vilket är avgavgörande för en ensam utvecklare. Detta ger snabbare tid till marknad och lägre risk för driftfall. Dock kräver det en viss långsiktig planering kring dataexport om man senare vill byta plattform.",
+          "evidence_refs": [],
+          "created": "2026-10-07T15:28:29.035184+00:00"
+        },
+        "FIN": {
+          "member": "FIN",
+          "assessment": "Budgeten 1000 kr/mån räcker inte för utveckling (1 utvecklare), endast drift. Byggkostnad uppskattning: 200-400 timmar × 600-900 kr/h = 120k-360k kr. Drift kan hållas 0-500 kr/mån med OpenStreetMap (ej Google Maps) + Firebase Spark. Intäkter kräver volym (annonser, låg RPM i SE) eller prenumeration. Break-even: ~100 betalande användare/mån för att täcka drift, men byggkostnaden är en engångsskuld. Runway: 1000 kr/mån räcker för ~2-12 månaders drift beroende på kartval, ej för bygg.",
+          "risk": "Kart-API-kostnader. Google Maps Pricing kan bli tusentals kr/mån vid 1000+ aktiva användare. OpenStreetMap kräver egen server för skalning. Annonsintäkter täcker sällan drift i Sverige.",
+          "recommendation": "Primärt: Bygg MVP i Kotlin (Android-only) med OSM/Mapbox och Firebase gratisnivå. Alternativ: Web-first PWA för att testa intresse innan apputveckling. Byt åsikt om du får sponsoravtal eller kan finansiera byggskedet utanför månadskostnaden. Prioritera ruttplanering framför socialt för att spara tid.",
+          "assumptions": [
+            "Timpris 600-900 kr/h (uppskattning SE-marknad)",
+            "1000 kr/mån är driftbudget, ej byggbudget",
+            "Google Play Console avgift 300 kr engångs",
+            "Inga intäkter första 6 månaderna",
+            "Användare accepterar gratisversion med annonser"
+          ],
+          "confidence": "Moderate",
+          "reflection": "Budgeten är den kritiska flaskhalsen. Utan extern finansiering eller eget arbete (ej bet",
+          "evidence_refs": [],
+          "created": "2026-10-07T15:28:29.035197+00:00"
+        },
+        "LEGAL": {
+          "member": "LEGAL",
+          "assessment": "Appen behandlar platsdata (GPS) och eventuellt användargenererat innehåll (rutter, kommentarer). Enligt GDPR och svensk dataskyddslag är platsdata personuppgifter som kräver laglig grund – vanligtvis informerat samtycke eller berättigat intresse med tydlig informationsskyldighet. Integritetspolicy måste finnas och uppfylla artiklarna 12‑14 (transparent information) samt artikel 6 (laglig grund). Om appen samlar hälsodata (puls, etc.) blir det särskild kategori som kräver artikel 9‑samtycke. Användarvillkor behövs för att reglera ansvar för felaktig ruttinformation och användar‑genererat innehåll; en ansvarsfriskrivning bör klargöra att appen inte garanterar säkerhet och att användaren ansvarar för att följa trafikregler. Eftersom appen riktar sig till allmänheten i Sverige är åldersklassningen troligen 3+ (ingen vuxen eller våldsam innehåll), men social delning kräver måttlig moderering för att undvika kränkande innehåll och upphovsrättsintrång. Google Play kräver en Data Safety-sektion som beskriver insamlad data, syfte och delning samt efterlevnad av deras policy om användar‑genererat innehåll och annonser.",
+          "risk": "Den största juridiska risken är bristande efterlevnad av GDPR beträffande plats‑ och eventuell hälsodata, vilket kan leda till tillsyn från svenska Datainspektionen, böter upp till 4 % av global omsättning eller 20 miljoner euro samt skadeståndskrav från användare om felaktig ruttinformation orsakar personskada. En sekundär risk är att appen tas bort från Google Play för brott mot policyn kring användar‑genererat innehåll eller otillräcklig dataskyddsinformation.",
+          "recommendation": "Primär rekommendation: bygg appen med ‘privacy by design’ – samla endast nödvändig platsdata, erhåll tydligt förhands‑samtycke vid första start, förse användaren med en lättläst integritetspolicy och användarvillkor (ansvarsfriskrivning för ruttfel och innehåll), implementera en enkel åldersklassning 3+, lägg till grundläggande moderering (rapportera‑knapp) för användar‑genererade rutter, och fyll i Google Play’s Data Safety-sektion korrekt. Alternativ: ta bort den sociala delningsfunktionen helt och låt appen vara enbart personlig ruttplanerare; detta minskar behovet av moderering och användar‑genererat innehåll, vilket sänker både GDPR‑risk (ingen delning av tredje parts data) och risken för policybrott i Play Store. Jag skulle byta åsikt om det visar sig att appen måste samla hälsodata för kärnfunktionen (t.ex. pulsbaserad träning) – då skulle ett uttryckligt artikel 9‑samtycke bli nödvändigt och alternativet att ta bort social delning skulle inte räcka för att minska risken.",
+          "assumptions": [
+            "Appen riktar sig endast till användare i Sverige (EU).",
+            "Insamlad data begränsas till GPS‑plats, hastighet och eventuellt tid; ingen hälsodata som puls eller kondition samlas in om inte annat anges.",
+            "Målgruppen är inte specifikt barn under 13 år; ingen särskild barnskyddslag (COPPA) behövs.",
+            "Ingen monetisering via personlig annonsering som kräver ytterligare samtycke utöver GDPR.",
+            "Appen ger inte medicinska eller träningsråd som skulle kunna klassas som hälsotjänst enligt svensk lag.",
+            "Användar‑genererat innehåll övervakas i efterhand via rapporteringsfunktion, inte i förhandgranskning."
+          ],
+          "confidence": "Moderate",
+          "reflection": "Svaret baseras på allmän kunskap om GDPR, svensk dataskyddslag och Google Play-policy; det ersätter inte juridisk rådgivning. En kvalificerad advokat bör granska integritetspolicy, användarvillkor och eventuell hälsodata innan lansering.",
+          "evidence_refs": [],
+          "created": "2026-10-07T15:28:29.035204+00:00"
+        },
+        "MARK": {
+          "member": "MARK",
+          "assessment": "För att positionera appen bland svenska cyklister behöver vi klargöra vilken specifik nisch vi fyller som inte täcks av Strava, Komoot eller Google Maps. Genom en Jobs-to-be-Done-analys identifierar vi tre primära behov: (1) detaljerade höjdprofiler för svenska vägar och grusvägar baserade på OpenStreetMap + Lantmäteriets höjddata, (2) enkel grupp-rideplanering med möjlighet att bjuda in vänner via SMS eller delningslänk och se realtidposition, (3) väderintegrering som visar nederbörd och vind för kommande timmar längs rutten. Vi genomför en snabb konkurrensanalys (SWOT) av de tre största aktörerna och noterar att de saknar lokaliserad svensk väderdata och har begränsad offline-funktion för landsbygd. Vi skapar ett värdeerbjudande-canvas och testar värdeerbjudandet med en enkel landningssida (Carrd) riktad mot svenska cykelforum (Cykelwebben, SweCycle) och Reddit r/cycling, mätande CTR och e-postsignups. Om CTR >2% och signups/kostnad <10 SEK bekräftar vi att det finns intresse för en nischprodukt.",
+          "risk": "Den största risken är att organiskt räckvidd i den svenska cykelnischen är för begränsad givet vår budget och ensam utvecklare, vilket leder till för låg användarbas för att validera kärnfunktionerna och därmed ingen tydlig signal för att gå vidare eller pivotera. Detta kan hända om målgrupperna huvudsakligen använder etablerade plattformar och inte söker efter nya appar i forum eller om vårt budskap inte bryter igenom bruset.",
+          "recommendation": "Primär rekommendation: positionera appen som \"Den svenska cykelkompisens app – offline kartor, väder och grupprideplanering för cyklister i Sverige\". Fokusera organiskt på kanaler där målgruppen redan samlas: svenska cykelforum, Facebook-grupper som \"Cykla i Sverige\", Instagram-mikroinfluencers med 5k-20k följare som postar om svenska rutter, samt ASO med svenska nyckelord som \"cykelrutt Sverige\", \"höjdprofil cykel\", \"gruppride app\". Detta ger låg CAC och möjlighet att iterera snabbt med feedback från engagerade användare. Alternativ: om organiskt inte når 500 MAU inom 8 veckor, övergå till en bredare positionering som \"Allround cykelruttplanerare med social feed\" och investera i betald användarförvärv via Facebook/Google UAC med en testbudget på 500 kr/månad för att mäta CPA. Jag skulle byta åsikt om organiskt CAC konsekvent överstiger 30 SEK per aktiverad användare eller om aktiveringsgraden (signup → första rutt) ligger under 10% efter fyra veckor, vilket skulle signalera att värdeerbjudandet inte resonerar nog starkt för att rättfärdiga betald skala.",
+          "assumptions": [
+            "Svenska cyklister aktivt söker efter lokalt anpassade rutt- och väderverktyg och är villiga att prova en ny app.",
+            "OpenStreetMap-data kompletterat med Lantmäteriets höjddata ger tillräcklig noggrannhet för höjdprofiler i Sverige utan kostsam dataköp.",
+            "Väder-API (t.ex. Open-Meteo eller SMHI) kan integreras för under 500 kr/månad.",
+            "En ensam utvecklare kan leverera ett MVP med offline-kartor, grundläggande ruttplanering, väderöverlagring och enkel social feed inom 3 månader arbetstid på deltid (ca 20 h/vecka).",
+            "Användare kommer att dela sina turer i appens feed utan att behöva omfattande moderation eller incitament i tidig fas."
+          ],
+          "confidence": "Moderate",
+          "reflection": "Jag antar att den svenska cykelgemenskapen är tillräckligt engagerad i nischade forum för att organiskt nå dem med begränsad mediebudget; om detta visar sig felaktigt måste vi snabbt testa betalda kanaler eller justera värdeerbjudandet.",
+          "evidence_refs": [],
+          "created": "2026-10-07T15:28:29.035212+00:00"
+        }
+      },
+      "decision": {
+        "status": "PILOT",
+        "reason": "Rådet rekommenderar pilot: bygg litet, mät, skala sedan",
+        "adil_result": null,
+        "founder_choice": null,
+        "founder_choice_source": null
+      },
+      "outcome": {
+        "status": "PENDING",
+        "evidence_refs": [],
+        "summary": null
+      },
+      "created": "2026-10-07T15:28:29.035133+00:00",
+      "updated": "2026-10-07T15:28:29.035223+00:00"
+    }
+  },
   "lessons": {},
   "events": []
 }

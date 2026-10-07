@@ -21,7 +21,7 @@ DEFAULT_BASE = 'https://api.cline.bot/api/v1'
 CLINE_BASE = 'https://api.cline.bot/api/v1'
 OPENAI_BASE = 'https://api.openai.com/v1'
 DEFAULT_MODEL = 'openrouter/free'
-TIMEOUT = 120
+TIMEOUT = 75  # gratisa modeller kan vara långsamma; två försök per medlem → max ~2,5 min
 MODELS_TTL_SECONDS = 600
 
 # Används om API:et inte går att nå (offline CI, nätverksfel).
@@ -78,7 +78,9 @@ def _model() -> str:
 def _post(path: str, payload: dict) -> dict:
     data = json.dumps(payload).encode('utf-8')
     last_exc: RuntimeError | None = None
-    for attempt in range(2):  # en retry vid rate-limit/5xx (gratismodeller begränsar)
+    # Upp till 3 försök vid rate-limit/5xx/timeout — gratisa modeller är ostadiga
+    # ("empty response content", läs-timeouts) och behöver fler chanser.
+    for attempt in range(3):
         req = urllib.request.Request(
             _base() + path,
             data=data,
@@ -92,12 +94,23 @@ def _post(path: str, payload: dict) -> dict:
         except urllib.error.HTTPError as exc:
             detail = exc.read().decode('utf-8', 'replace')[:500]
             last_exc = RuntimeError(f'LLM HTTP {exc.code}: {detail}')
-            if exc.code in (429, 500, 502, 503, 504) and attempt == 0:
-                time.sleep(3)
+            if exc.code in (429, 500, 502, 503, 504) and attempt < 2:
+                time.sleep(2 ** attempt)
+                continue
+            raise last_exc from exc
+        except (TimeoutError, ConnectionError) as exc:
+            last_exc = RuntimeError(f'LLM timeout/anslutning: {exc}')
+            if attempt < 2:
+                time.sleep(2 ** attempt)
                 continue
             raise last_exc from exc
         except urllib.error.URLError as exc:
-            raise RuntimeError(f'LLM unreachable: {exc.reason}') from exc
+            reason = getattr(exc, 'reason', exc)
+            last_exc = RuntimeError(f'LLM unreachable: {reason}')
+            if isinstance(reason, (TimeoutError, ConnectionError, OSError)) and attempt < 2:
+                time.sleep(2 ** attempt)
+                continue
+            raise last_exc from exc
         except (OSError, ValueError) as exc:
             # timeout/socket-fel/ogiltig JSON — bli aldrig ett opåhållat undantag
             raise RuntimeError(f'LLM failed: {type(exc).__name__}: {exc}') from exc

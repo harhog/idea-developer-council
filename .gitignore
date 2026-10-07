@@ -3,5 +3,6 @@ __pycache__/
 *.log
 .env
 memory/.store-*.json
+memory/history.json
 .vscode/
 .idea/

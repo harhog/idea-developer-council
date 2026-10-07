@@ -90,6 +90,24 @@ def roadmap(req: RoadmapRequest):
         raise HTTPException(status_code=502, detail=str(exc)) from exc
 
 
+@app.get('/history')
+def history_list():
+    """Tidigare rådsron (senast först), summeringar utan roadmap-delen."""
+    try:
+        return {'runs': memory.list_runs()}
+    except ValueError as exc:
+        raise HTTPException(status_code=500, detail=str(exc)) from exc
+
+
+@app.get('/history/{run_id}')
+def history_run(run_id: str):
+    """En sparad ron med hela roadmapen — för att titta på tidigare svar."""
+    try:
+        return memory.get_run(run_id)
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+
+
 @app.get('/memory/validate')
 def memory_validate():
     return memory.validate()

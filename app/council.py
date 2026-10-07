@@ -73,6 +73,8 @@ def _member_messages(member: str, brief: str, restrictions: dict,
         '- assumptions: tydliga antaganden som kan bli fel.\n'
         '- roadmap_input: fält du anser nödvändiga för din del av roadmapen '
         '(t.ex. stack-alternativ, checklists, kriterier, kostnadsband).\n'
+        'Håll varje textfält koncentrerat (max ca 1200 tecken) — innehållsrikt '
+        'och konkret, inte utfyllnad, så att hela JSON:en hinner bli komplett.\n'
         'Svara ENBART med ett JSON-objekt i denna form: {"assessment": str, "risk": str, '
         '"recommendation": str, "assumptions": [str], "confidence": "High|Moderate|Low|'
         'Very Low", "reflection": str, "roadmap_input": {fri struktur relevant för din '
@@ -132,31 +134,61 @@ def _stack_stub(task_class: str) -> str:
     }.get(task_class, 'Välj efter plattform; se TECH-kontraktet.')
 
 
+VALID_CONFIDENCE = ('High', 'Moderate', 'Low', 'Very Low')
+
+
+def _normalize_contribution(parsed: dict, member: str, model: str | None) -> dict:
+    """Fullständiga obligatoriska fält — minnesmotorn kräver icke-tom
+    'reflection' och confidence exakt High/Moderate/Low/'Very Low',
+    och roadmappen ska alltid renderas komplett."""
+    parsed['member'] = member
+    parsed['assessment'] = str(parsed.get('assessment') or '').strip()
+    parsed['recommendation'] = str(parsed.get('recommendation') or '').strip()
+    parsed['risk'] = str(parsed.get('risk') or '').strip()
+    parsed['reflection'] = str(parsed.get('reflection') or '').strip() or (
+        'Modellen gav ingen separat eftertanke; bedömningen ovan gäller.')
+    conf = str(parsed.get('confidence') or '').strip().casefold()
+    parsed['confidence'] = next(
+        (c for c in VALID_CONFIDENCE if c.casefold() == conf), 'Moderate')
+    parsed['assumptions'] = [str(a) for a in (parsed.get('assumptions') or [])
+                             if str(a).strip()]
+    parsed['source'] = str(parsed.get('source') or 'llm')
+    parsed['model'] = model or llm._model()
+    return parsed
+
+
 def _one_contribution(member: str, brief: str, restrictions: dict,
                       task_class: str, project_id: str,
                       model: str | None) -> tuple:
-    """Returns (contribution, error|None) — one member, never raises."""
+    """Returns (contribution, error|None) — one member, never raises.
+
+    Online: upp till 2 försök (gratismodeller kan svara trunkerat eller med
+    skräp) innan medlemmen fallerar till offline-heuristiken.
+    """
     try:
         prior = memory.context(project_id, member, task_class)
     except Exception:
         prior = {'current_decisions': [], 'lessons': []}
     if llm.online():
-        try:
-            raw = llm.chat(_member_messages(member, brief, restrictions,
-                                            task_class, prior),
-                           json_mode=True, model=model)
-            parsed = llm.extract_json(raw)
-            parsed['member'] = member
-            parsed.setdefault('source', 'llm')
-            parsed.setdefault('confidence', 'Not stated')
-            parsed.setdefault('model', model or llm._model())
-            return parsed, None
-        except Exception as exc:  # noqa: BLE001 — rådet ska aldrig fallera
-            err = f'{member}: {type(exc).__name__}: {str(exc)[:300]}'
-            fb = _offline_member(member, task_class, brief)
-            fb['source'] = 'offline-fallback'
-            fb['risk'] = f'LLM-fel, heuristik användes: {str(exc)[:200]}'
-            return fb, err
+        last_exc: Exception | None = None
+        for _ in range(2):
+            try:
+                raw = llm.chat(_member_messages(member, brief, restrictions,
+                                                task_class, prior),
+                               json_mode=True, model=model)
+                parsed = _normalize_contribution(llm.extract_json(raw), member, model)
+                if not parsed['assessment'] or not parsed['recommendation']:
+                    raise ValueError(
+                        'ofullständigt svar: saknar assessment/recommendation')
+                return parsed, None
+            except Exception as exc:  # noqa: BLE001 — rådet ska aldrig fallera
+                last_exc = exc
+        err = (f'{member}: {type(last_exc).__name__}: '
+               f'{str(last_exc)[:300]} (efter 2 försök)')
+        fb = _offline_member(member, task_class, brief)
+        fb['source'] = 'offline-fallback'
+        fb['risk'] = f'LLM-fel, heuristik användes: {str(last_exc)[:200]}'
+        return fb, err
     return _offline_member(member, task_class, brief), None
 
 
@@ -300,4 +332,8 @@ def run_council(brief: str, restrictions: dict | None = None,
             roadmap['task_id'] = task_id
         except Exception as exc:  # memory never breaks advice delivery
             roadmap['memory_error'] = str(exc)
+        try:
+            roadmap['run_id'] = memory.record_run(roadmap)
+        except Exception as exc:  # historik ska aldrig bryta rådet
+            roadmap['history_error'] = str(exc)
     return roadmap

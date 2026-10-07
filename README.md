@@ -36,7 +36,9 @@ obligatoriskt utdataformat. Kunskapsbasen ligger i
    server & drift → juridik → etapper med mätbara kriterier → risker →
    nästa experiment.
 7. **Minne** — hela ronden skrivs till JSON-butiken med atomiska skrivningar
-   och explicit validering (`scripts/council_memory.py`).
+   och explicit validering (`scripts/council_memory.py`), och varje rondo
+   arkiveras dessutom i `memory/history.json` (senaste 100) så att du kan
+   gå tillbaka och titta på svaren via **Tidigare svar**-sektionen i UI:t.
 
 ## Kom igång
 
@@ -52,8 +54,9 @@ inbyggt **webb-UI** (svenskt, mörkt, inga externa beroenden): fyll i brief
 och restriktioner, välj **modell** (gratismodeller först, sparas lokalt i
 webbläsaren), klicka **"Få råd av rådet"** och se beslut, roadmap-sektioner
 (etapper som tabell) och varje medlems bidrag renderade direkt. Statusraden
-visar LLM-läge (online/offline) och minnets hälsa. API-dokumentationen ligger
-kvar på `/docs`.
+visar LLM-läge (online/offline) och minnets hälsa. Längre ner listas
+**tidigare svar** (klicka **Visa** för att läsa en tidigare rondo i sin helhet).
+API-dokumentationen ligger kvar på `/docs`.
 
 ### Online-läge & gratismodeller
 
@@ -64,9 +67,13 @@ på app.cline.bot) svarar alla rådets medlemmar **online** via vald modell:
   först** (`:free`-suffix + `openrouter/free`), med curatorerad fallback.
 - Valet skickas som `"model"` i `POST /roadmap` (UI:t sparar det i localStorage).
 - Medlemmarna körs **parallellt** — ronden svarar på drygaste medlemmens tid.
-- Grátisrouternar kan ibland svara skräp/trunkerad JSON; `app/llm.py` gör
-  omförsök och reparerar innan medlemmen fallerar till offline-stubben
-  (`llm_errors` i svaret). Rådet svarar alltid.
+- Robusthet mot ostadiga gratisroutrar (mätta i drift): upp till **3 API-försök
+  med backoff** per anrop (429/5xx/timeout), **75 s timeout**, och **2 försök per
+  medlem** (trunkerat/skräpsvar får ny chans) innan medlemmen fallerar till
+  offline-stubben — felen rapporteras som `llm_errors`. Rådet svarar alltid.
+- Varje rondo sparas automatiskt: episod i minnesbutiken (`task_id`) **och**
+  hela svaret i historiken (`run_id`) — kravfälten (`reflection`, `confidence`)
+  normaliseras så att lagringen aldrig kan krascha.
 - Utan nyckel (eller om enstaka medlemmar misslyckas) körs **offline-läge**:
   heuristiska bidrag, märkt `mode: "offline"`.
 
@@ -77,6 +84,8 @@ GET  /                       # webb-UI (HTML)
 GET  /health                 # llm_mode + vald modell
 GET  /models                 # modellista (gratis först), cachead 10 min
 GET  /agents
+GET  /history                # tidigare ronder (senast först), summeringar
+GET  /history/{run_id}       # en sparad ron med hela roadmapen
 GET  /memory/validate
 GET  /memory/projects
 GET  /memory/context/{project_id}/{member}?task_class=web
@@ -115,7 +124,8 @@ OBSERVERA: `<root>` kommer **efter** subkommandot.
 ```bash
 python tests/test_council_memory.py     # 10 tester
 python tests/test_member_knowledge.py   # 6 tester
-python tests/test_council.py            # 20 tester (routing + offline + UI + modeller)
+python tests/test_council.py            # 37 tester (routing + offline + UI +
+                                        #   modeller + historik + LLM-resiliens)
 ```
 
 Körs direkt (ingen `unittest discover`), som i CI.

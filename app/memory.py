@@ -1,5 +1,9 @@
 """Bridge to scripts/council_memory.py (stdlib memory engine)."""
+import json
+import os
 import sys
+import uuid
+from datetime import datetime, timezone
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -17,6 +21,12 @@ from council_memory import (  # noqa: E402
 )
 
 _memory = Memory(DEFAULT_ROOT)
+
+# --- Rondhistorik (hela svaren, bläddringsbar via GET /history) --------------
+# Separat från store.json: engine:s schema är låst, och här vill vi spara
+# exakt det rådet svarade (sektioner + bidrag + model/mode/fel).
+HISTORY_FILE = DEFAULT_ROOT / 'history.json'
+HISTORY_LIMIT = 100
 
 
 def get_memory() -> Memory:
@@ -87,3 +97,65 @@ def record_advice(project_id: str, task_id: str, question: str, task_class: str,
         )
     save(data)
     return {'task_id': task_id, 'stored': True}
+
+
+# --- Rondhistorik -----------------------------------------------------------
+def _history_load() -> list:
+    if not HISTORY_FILE.exists():
+        return []
+    raw = json.loads(HISTORY_FILE.read_text(encoding='utf-8'))
+    if not isinstance(raw, list):
+        raise ValueError('history.json innehåller inte en lista')
+    return raw
+
+
+def _history_save(runs: list) -> None:
+    HISTORY_FILE.parent.mkdir(parents=True, exist_ok=True)
+    tmp = HISTORY_FILE.with_suffix('.json.tmp')
+    tmp.write_text(json.dumps(runs, ensure_ascii=False, indent=1),
+                   encoding='utf-8')
+    os.replace(tmp, HISTORY_FILE)
+
+
+def record_run(roadmap: dict) -> str:
+    """Spara en fullständig rådsron till historiken. Returnerar run_id."""
+    run_id = 'R-' + uuid.uuid4().hex[:8]
+    stored = dict(roadmap)
+    stored['run_id'] = run_id
+    sources: dict = {}
+    for c in stored.get('contributions', []):
+        src = str(c.get('source') or 'llm')
+        sources[src] = sources.get(src, 0) + 1
+    entry = {
+        'run_id': run_id,
+        'at': datetime.now(timezone.utc).isoformat(timespec='seconds'),
+        'project_id': stored.get('project_id'),
+        'task_id': stored.get('task_id'),
+        'brief': str(stored.get('brief') or ''),
+        'decision': (stored.get('decision') or {}).get('status'),
+        'task_class': stored.get('task_class'),
+        'mode': stored.get('mode'),
+        'model': stored.get('model'),
+        'sources': sources,
+        'llm_errors': len(stored.get('llm_errors') or []),
+        'memory_error': stored.get('memory_error'),
+        'roadmap': stored,
+    }
+    runs = _history_load()
+    runs.insert(0, entry)
+    del runs[HISTORY_LIMIT:]
+    _history_save(runs)
+    return run_id
+
+
+def list_runs() -> list:
+    """Summeringar, senast först — utan den tunga roadmap-delen."""
+    return [{k: v for k, v in e.items() if k != 'roadmap'}
+            for e in _history_load()]
+
+
+def get_run(run_id: str) -> dict:
+    for entry in _history_load():
+        if entry.get('run_id') == run_id:
+            return entry
+    raise ValueError(f'Okänt kör-id: {run_id}')
